@@ -19,3 +19,11 @@
 
 # Go workspace file
 go.work
+
+.idea/
+cache/
+log/
+docs/
+
+fish-blog
+

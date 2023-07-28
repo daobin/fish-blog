@@ -1,7 +1,7 @@
 mongo:
   tags: fish
   fish:
-    url: mongodb://fishlai:fishlai@192.168.190.134:27017/fish
+    url: mongodb://fish:fish@127.0.0.1:2717/fish
     dbName: fish
     pool:
       min: 2

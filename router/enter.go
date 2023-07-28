@@ -32,7 +32,7 @@ func initAdminRouter(engine *goeasy.Engine) {
 	// 路由中间件：校验用户登录状态
 	rtGroup.Use(middleware.CheckLogin())
 
-	// 文章分类
+	// 分类
 	rtGroup.POST("category", func(c *goeasy.Context) {
 		c.Json(http.StatusOK, admin.Category.Add(c))
 	})
@@ -48,6 +48,24 @@ func initAdminRouter(engine *goeasy.Engine) {
 	rtGroup.GET("category/list", func(c *goeasy.Context) {
 		c.Json(http.StatusOK, admin.Category.GetList(c))
 	})
+	rtGroup.GET("category/tree", func(c *goeasy.Context) {
+		c.Json(http.StatusOK, admin.Category.GetTree(c))
+	})
+
+	// 文章
+	rtGroup.POST("article", func(c *goeasy.Context) {
+		c.Json(http.StatusOK, admin.Article.Add(c))
+	})
+	rtGroup.PUT("article", func(c *goeasy.Context) {
+		c.Json(http.StatusOK, admin.Article.Update(c))
+	})
+	rtGroup.GET("article/:id", func(c *goeasy.Context) {
+		c.Json(http.StatusOK, admin.Article.GetInfo(c))
+	})
+	rtGroup.GET("article/list", func(c *goeasy.Context) {
+		c.Json(http.StatusOK, admin.Article.GetList(c))
+	})
+
 }
 
 func initIndexRouter(engine *goeasy.Engine) {

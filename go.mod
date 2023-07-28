@@ -2,8 +2,10 @@ module github.com/daobin/fish-blog
 
 go 1.19
 
+replace github.com/daobin/goeasy => ../goeasy
+
 require (
-	github.com/daobin/goeasy v1.0.2
+	github.com/daobin/goeasy v1.0.3
 	github.com/daobin/gotools v1.0.1
 	github.com/knadh/koanf v1.5.0
 	github.com/swaggo/swag v1.8.12

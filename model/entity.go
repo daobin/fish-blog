@@ -25,7 +25,7 @@ type UserEntity struct {
 	UpdatedAt int64         `json:"updatedAt" bson:"updatedAt"` // 更新时间戳
 }
 
-// CategoryEntity 文章分类 [mongo]
+// CategoryEntity 分类 [mongo]
 type CategoryEntity struct {
 	Id          bson.ObjectId `json:"id" bson:"_id"`
 	CateId      string        `json:"cateId" bson:"cateId"`           // 分类ID

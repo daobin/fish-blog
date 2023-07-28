@@ -1,5 +1,7 @@
 package util
 
+const SortDefault = 50
+
 // 状态
 const (
 	StateEnable  = iota + 1 // 启用

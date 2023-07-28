@@ -14,7 +14,7 @@ func InitDbConf() func(c *goeasy.Context) {
 		// 初始化Mongo
 		err := db.Mongo.InitFile()
 		if err != nil {
-			c.Json(http.StatusInternalServerError, model.Error[any](util.ErrCodeSystem.ToInt(), util.ErrCodeSystem.GetText()))
+			c.Json(http.StatusInternalServerError, model.Error[any](util.SystemAbnormal.ToInt(), util.SystemAbnormal.GetText()))
 			c.Abort()
 			return
 		}

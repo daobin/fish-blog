@@ -5,6 +5,10 @@ import (
 	"github.com/daobin/goeasy"
 )
 
+//@Title Fish-Blog
+//@Version 1.0.0
+//@Description Fish个人博客
+
 func main() {
 	// 新建框架引擎
 	engine := goeasy.New()

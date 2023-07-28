@@ -9,13 +9,14 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"log"
+	"strings"
 )
 
-const tableCategory = "fb_category"
+const tableArticle = "fb_article"
 
-type category struct{}
+type article struct{}
 
-func (cate *category) Save(entity *model.CategoryEntity) error {
+func (art *article) Save(entity *model.ArticleEntity) error {
 	conn, err := gotools.DB.Mongo.Get(conf.App.GetString("dbTag.mongo"))
 	if err != nil {
 		log.Println("mongo连接错误：", err.Error())
@@ -23,7 +24,7 @@ func (cate *category) Save(entity *model.CategoryEntity) error {
 	}
 	defer gotools.DB.Mongo.CloseCurrent(conn)
 
-	_, err = conn.C(tableCategory).UpsertId(entity.Id, entity)
+	_, err = conn.C(tableArticle).UpsertId(entity.Id, entity)
 	if err != nil {
 		log.Println("mongo更新（添加）错误：", err.Error())
 		return util.DbAbnormal.NewError()
@@ -32,7 +33,7 @@ func (cate *category) Save(entity *model.CategoryEntity) error {
 	return nil
 }
 
-func (cate *category) GetByCateId(cateId string) (*model.CategoryEntity, error) {
+func (art *article) GetByArticleId(articleId string) (*model.ArticleEntity, error) {
 	conn, err := gotools.DB.Mongo.Get(conf.App.GetString("dbTag.mongo"))
 	if err != nil {
 		log.Println("mongo连接错误：", err.Error())
@@ -40,8 +41,8 @@ func (cate *category) GetByCateId(cateId string) (*model.CategoryEntity, error) 
 	}
 	defer gotools.DB.Mongo.CloseCurrent(conn)
 
-	info := &model.CategoryEntity{}
-	err = conn.C(tableCategory).Find(bson.M{"cateId": cateId}).One(info)
+	info := &model.ArticleEntity{}
+	err = conn.C(tableArticle).Find(bson.M{"articleId": articleId}).One(info)
 	if err != nil {
 		if errors.Is(err, mgo.ErrNotFound) {
 			return nil, nil
@@ -54,7 +55,7 @@ func (cate *category) GetByCateId(cateId string) (*model.CategoryEntity, error) 
 	return info, nil
 }
 
-func (cate *category) GetByCateName(cateName, filterOutCateId string) (*model.CategoryEntity, error) {
+func (art *article) GetByArticleTitle(title, filterOutArticleId string) (*model.ArticleEntity, error) {
 	conn, err := gotools.DB.Mongo.Get(conf.App.GetString("dbTag.mongo"))
 	if err != nil {
 		log.Println("mongo连接错误：", err.Error())
@@ -62,8 +63,8 @@ func (cate *category) GetByCateName(cateName, filterOutCateId string) (*model.Ca
 	}
 	defer gotools.DB.Mongo.CloseCurrent(conn)
 
-	info := &model.CategoryEntity{}
-	err = conn.C(tableCategory).Find(bson.M{"name": cateName, "cateId": bson.M{"$ne": filterOutCateId}}).One(info)
+	info := &model.ArticleEntity{}
+	err = conn.C(tableArticle).Find(bson.M{"title": title, "articleId": bson.M{"$ne": filterOutArticleId}}).One(info)
 	if err != nil {
 		if errors.Is(err, mgo.ErrNotFound) {
 			return nil, nil
@@ -76,7 +77,7 @@ func (cate *category) GetByCateName(cateName, filterOutCateId string) (*model.Ca
 	return info, nil
 }
 
-func (cate *category) GetList(params *model.GetCategoryListReq) ([]model.CategoryEntity, int, error) {
+func (art *article) GetList(params *model.GetArticleListReq) ([]model.ArticleEntity, int, error) {
 	conn, err := gotools.DB.Mongo.Get(conf.App.GetString("dbTag.mongo"))
 	if err != nil {
 		log.Println("mongo连接错误：", err.Error())
@@ -84,17 +85,12 @@ func (cate *category) GetList(params *model.GetCategoryListReq) ([]model.Categor
 	}
 	defer gotools.DB.Mongo.CloseCurrent(conn)
 
-	if params.State == util.StateDelete {
-		return []model.CategoryEntity{}, 0, nil
-	}
-
 	// 查询条件
-	find := bson.M{"state": bson.M{"$ne": util.StateDelete}}
-	if params.Name != "" {
-		find["name"] = bson.M{"$regex": params.Name}
-	}
-	if params.ParentId != "" {
-		find["parentId"] = params.ParentId
+	find := bson.M{}
+
+	cateIds := strings.Trim(params.CateIds, ", ")
+	if cateIds != "" {
+		find["cateId"] = bson.M{"$in": strings.Split(cateIds, ",")}
 	}
 	if params.State != 0 {
 		find["state"] = params.State
@@ -108,15 +104,15 @@ func (cate *category) GetList(params *model.GetCategoryListReq) ([]model.Categor
 	}
 
 	// 获取数据总量
-	rdCount, err := conn.C(tableCategory).Find(find).Count()
+	rdCount, err := conn.C(tableArticle).Find(find).Count()
 	if err != nil {
 		log.Println("mongo查询错误：", err.Error())
 		return nil, 0, util.DbAbnormal.NewError()
 	}
 
-	list := make([]model.CategoryEntity, 0)
+	list := make([]model.ArticleEntity, 0)
 	if params.IsReturnPage == false {
-		err = conn.C(tableCategory).Find(find).Sort("state", "sort").All(&list)
+		err = conn.C(tableArticle).Find(find).Sort("state", "sort", "-createdAt").All(&list)
 		if err != nil {
 			log.Println("mongo查询错误：", err.Error())
 			return nil, 0, util.DbAbnormal.NewError()
@@ -127,7 +123,7 @@ func (cate *category) GetList(params *model.GetCategoryListReq) ([]model.Categor
 
 	// 获取分页数据
 	skip := (params.PageIndex - 1) * params.PageSize
-	err = conn.C(tableCategory).Find(find).Sort("state", "sort").Skip(skip).Limit(params.PageSize).All(&list)
+	err = conn.C(tableArticle).Find(find).Sort("state", "sort").Skip(skip).Limit(params.PageSize).All(&list)
 	if err != nil {
 		log.Println("mongo查询错误：", err.Error())
 		return nil, 0, util.DbAbnormal.NewError()

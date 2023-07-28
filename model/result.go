@@ -5,8 +5,8 @@ import "net/http"
 // Result HTTP接口响应结构体
 type Result[T any] struct {
 	Status int         `json:"status"`         // 状态码
-	Msg    string      `json:"msg"`            // 其他信息
-	Data   T           `json:"data"`           // 响应数据
+	Msg    string      `json:"msg,omitempty"`  // 其他信息
+	Data   T           `json:"data,omitempty"` // 响应数据
 	Page   *ResultPage `json:"page,omitempty"` // 分页信息
 }
 
